@@ -232,15 +232,16 @@
 				perCity.values.forEach(function(d) {
 					if (!timePeriods.includes(d.yearmonth)) {
 
+						var name = d.city + "_" + d.yearmonth;
 						var addNode = [{
 							"node": countid,
-							"name": d.city + "_" + d.yearmonth,
+							"name": name,
 							"nPeople": 1
 						}];
 						    //nPeople[d.] = (nPeople[a] || 0) + 1;
 
 						timePeriods.push(d.yearmonth);
-						nodesSankey.push(addNode);
+						nodesSankey[name] = addNode;
 						countid = countid + 1;
 					} else {
 						var found = perCity.values.find(function(element) {
