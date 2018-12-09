@@ -14,7 +14,7 @@ function updateLinks() {
 			.curve(d3.curveCatmullRom.alpha(1));
 
 		var u = g.selectAll('path')
-			.data(dataNest, function (d, i) {
+			.data(peopleNest, function (d, i) {
 				return d;
 			});
 
@@ -33,16 +33,16 @@ function updateLinks() {
 				return person_EntityLine(d.values); //d.lineString;	
 			});
 
-		console.log(dataNest);
+		console.log(peopleNest);
 
 	} else if (bunshin.checked) {
 
-		console.log(dataNest);
-		addBunshinPoints(dataNest);
+		console.log(peopleNest);
+		addBunshinPoints(peopleNest);
 
 		var lineData = [];
 
-		for (var j = 1; j < dataNest.length; j++) {
+		for (var j = 1; j < peopleNest.length; j++) {
 
 			var person = d3.selectAll("circle.P" + j)._groups[0];
 			var lineData_eachPerson = [];

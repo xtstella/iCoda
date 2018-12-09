@@ -124,7 +124,7 @@
 				dir: './database/test1.csv',
 				time: "date", // Key within the data to be used to extract data for x axes
 				location: "city", // Key within data to be used for y values of curves
-				numberToShow: 5000 // Max number of data to show
+				numberToShow: 500 // Max number of data to show
 			},
 			container: '#chart',
 			tooltip: '#chart-tooltip',
@@ -162,13 +162,12 @@
 		createChart();
 
 		var subset;
-		var dataNest;
+		var peopleNest = [];
+		var cityNest = [];
 
-		var dataObject_reviewer,
-			nodesArray,
-			linksArray;
-
-		var nodes;
+		var cities = [];
+		var people = [];
+		var timePeriods = [];
 
 		for (var i = 0; i < selects.length; i++) {
 			var elem = selects[i];
@@ -216,10 +215,48 @@
 			updateNodes();
 			updateLinks();
 		}
+
+		var nodesSankey = [];
+
 		function handleSankey() {
+			cityNest = d3.nest()
+				.key(function(d) {
+					return d[chart.data.location];
+				})
+				.entries(subset);
+
+			var countid = 0;
+			cityNest.forEach(function(perCity) {
+				var timePeriods = [];
+				var nPeople = {};
+				perCity.values.forEach(function(d) {
+					if (!timePeriods.includes(d.yearmonth)) {
+
+						var addNode = [{
+							"node": countid,
+							"name": d.city + "_" + d.yearmonth,
+							"nPeople": 1
+						}];
+						    //nPeople[d.] = (nPeople[a] || 0) + 1;
+
+						timePeriods.push(d.yearmonth);
+						nodesSankey.push(addNode);
+						countid = countid + 1;
+					} else {
+						var found = perCity.values.find(function(element) {
+							console.log(element);
+							return element.name == d.city + "_" + d.yearmonth;
+						});
+						//console.log(found);
+						//found.nPeople = found.nPeople + 1;
+					}
+				})
+			});
+			console.log(nodesSankey);
 			updateNodes();
 			updateLinks();
 		}
+
 		function handleNormale() {
 			g.selectAll("g.bunshin").remove();
 			g.selectAll('g.bunshinLines').remove();

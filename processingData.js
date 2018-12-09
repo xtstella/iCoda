@@ -41,12 +41,12 @@ function ProcessingData(inputdata) {
 	subset = subset.sort(sortByCityAscending);
 
 	// Nest the entries by user_id
-	dataNest = d3.nest()
+	peopleNest = d3.nest()
 		.key(function (d) {
 			return d.reviewerid;
 		})
 		.entries(subset);
-
+	
 
 }
 
