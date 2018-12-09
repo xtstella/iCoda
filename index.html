@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title> Sankey Timeline for people between cities</title>
+	<link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Merriweather'>
+
+	<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js'></script>
+
+	<script src="http://d3js.org/d3.v4.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="index.css">
+</head>
+
+<style>
+
+	div.tooltipDetail {
+	position: absolute;
+	padding: 4px;
+	font-size: 11px;
+	background: rgba(192, 192, 192, 0.6);
+	pointer-events: none;
+	border-radius: 5px;
+}
+
+</style>
+
+<body>
+
+	<div id="option">
+		<input name="swapButton" id="swapButton" type="button" value="Swap Axis" />
+	</div>
+
+	<div class='container'>
+		<div id='discrete-scatterplot-selects' class='center-selects'>
+
+			<div class='select-container'>
+
+				<label>Montrer l'évolution dans le temps --> </label>
+				<label>Normale</label>
+				<input type='radio' name="group2" id='normale-checkbox' checked="checked" />
+				<label>Bunshin</label>
+				<input type='radio' name="group2" id='bunshin-checkbox' />
+				<label>Sankey</label>
+				<input type='radio' name="group2" id='sankey-checkbox' />
+			</div>
+			<br>
+			<!--		<div class='select-container'>
+				<label>Entity Focus:</label>
+				<select id='select-entityfocus'>
+					<option value='ville' selected>Ville</option>
+					<option value='personnage'>Personnage</option>				
+					Gender,occupations, nationalities, religion, Education
+				</select>
+			</div>-->
+
+			<!--
+			<div class='select-container'>
+				<label>Points:</label>
+				<select id='scatterplot-points'>
+					<option value='occupations' selected>Occupation</option>
+					<option value='gender'>Gender</option>
+					<option value='education'>Education</option>
+					<option value='religion'>Religion</option>
+					<option value='nationalities'>Nationality</option>
+					<option value='writing'>Writing</option>
+				</select>
+			</div>
+-->
+
+			<div class='select-container'>
+				<label>Comment voulez-vous mettre en évidence les coïncidences? --> </label>
+				<label>Rien </label>
+				<input type='radio' name="group1" id='rien-checkbox' checked="checked" />
+				<label>S'agrandir:</label>
+				<input type='radio' name="group1" id='enlarge-checkbox' /> <label>Jitter:</label>
+				<input type='radio' name="group1" id='jitter-checkbox' />
+
+			</div>
+
+		</div>
+
+		<div class='chart-container'>
+			<div id='chart-tooltip' class='tooltip'>
+				<div class='user'></div>
+				<div class='name'></div>
+				<div class='date'></div>
+				<div class='city'></div>
+			</div>
+			<div id='chart' class='chart'></div>
+		</div>
+	</div>
+
+	<script src="chart.js" charset="utf-8"></script>
+	<script src="axis.js" charset="utf-8"></script>
+	<script src="processingData.js" charset="utf-8"></script>
+	<script src="updateNodes.js" charset="utf-8"></script>
+	<script src="updateLinks.js" charset="utf-8"></script>
+	<script src="bunshin.js" charset="utf-8"></script>
+	<script src="sankey.js"></script>
+
+	<script>
+		var parameters = {
+			"show": {
+				"minReviewsToShow": 5,
+				"opacityHigh": 1,
+				"opacityLow": 0.2
+			}
+		}
+
+		// Parse the date from raw data.
+		var parseDate;
+		// Format the date to show in the tooltip
+		var hoverDate;
+		var formatCount = d3.format(",.0f");
+		var colors = d3.scaleOrdinal(d3.schemeCategory20);
+		var tooltipDetail, tooltipSummary;
+
+		var tootip;
+
+		var chart = {
+			data: {
+				dir: './database/test1.csv',
+				time: "date", // Key within the data to be used to extract data for x axes
+				location: "city", // Key within data to be used for y values of curves
+				numberToShow: 5000 // Max number of data to show
+			},
+			container: '#chart',
+			tooltip: '#chart-tooltip',
+			width: 1000,
+			height: 550,
+			margin: {
+				top: 20,
+				right: 50,
+				left: 145
+			},
+			padding: {
+				top: 60,
+				right: 20,
+				left: 20,
+				bottom: 20
+			},
+			jitterVal: 15,
+			radius: 5
+		}
+
+		var container = document.querySelector('#discrete-scatterplot-selects'),
+			entityfocus = container.querySelector('#select-entityfocus'),
+			normale = container.querySelector('#normale-checkbox'),
+			sankey = container.querySelector('#sankey-checkbox'),
+			bunshin = container.querySelector('#bunshin-checkbox'),
+			points = container.querySelector('#scatterplot-points'),
+			jitter = container.querySelector('#jitter-checkbox'),
+			enlarge = container.querySelector('#enlarge-checkbox'),
+			rien = container.querySelector('#rien-checkbox'),
+			selects = container.querySelectorAll('select'),
+			swapAxis = document.querySelector('#swapButton');
+
+		var svg, g, grid, neutral;
+		var xScale, xAxis, yScale, yAxis;
+		createChart();
+
+		var subset;
+		var dataNest;
+
+		var dataObject_reviewer,
+			nodesArray,
+			linksArray;
+
+		var nodes;
+
+		for (var i = 0; i < selects.length; i++) {
+			var elem = selects[i];
+			elem.addEventListener('change', redraw);
+		}
+
+		function redraw() {
+			d3.csv(chart.data.dir, function(error, data) {
+				ProcessingData(data);
+				updateChart();
+				updateNodes();
+				updateLinks();
+			})
+		};
+		redraw();
+
+		swapAxis.addEventListener('click', handleSwapAxis);
+		bunshin.addEventListener('change', handleBunshin);
+		normale.addEventListener('change', handleNormale);
+		sankey.addEventListener('change', handleSankey);
+		jitter.addEventListener('change', handleJitter);
+		enlarge.addEventListener('click', handleEnlarge);
+		rien.addEventListener('change', updateNodes);
+
+
+		function handleJitter() {
+			updateNodes();
+		}
+
+		function handleEnlarge() {
+			updateNodes();
+		}
+
+		var timeAxis_horizontal = true;
+
+		function handleSwapAxis() {
+			g.selectAll("g.bunshin").remove();
+			g.selectAll('g.bunshinLines').remove();
+			updateScale();
+			updateNodes();
+			updateLinks();
+		}
+
+		function handleBunshin() {
+			updateNodes();
+			updateLinks();
+		}
+		function handleSankey() {
+			updateNodes();
+			updateLinks();
+		}
+		function handleNormale() {
+			g.selectAll("g.bunshin").remove();
+			g.selectAll('g.bunshinLines').remove();
+			updateNodes();
+			updateLinks();
+		}
+
+
+		var colliding = false;
+
+		function collisionDetection(checkP, allP) {
+			var radius = 2;
+			var collidedPoints = [];
+			if (timeAxis_horizontal) {
+				var checkX = xScale(checkP[chart.data.time])
+				var checkY = yScale(checkP[chart.data.location])
+			} else {
+				var checkX = xScale(checkP[chart.data.time])
+				var checkY = yScale(checkP[chart.data.location])
+			}
+			allP.forEach(function(d) {
+				var pX = d.cx.animVal.value;
+				var pY = d.cy.animVal.value;
+				var a = pX - checkX;
+				var b = pY - checkY;
+
+				var c = Math.sqrt(a * a + b * b);
+				var distance = c;
+				if (distance < radius) {
+					collidedPoints.push(d);
+				}
+			});
+			return collidedPoints;
+		}
+
+		function getRadius(d, i, e) {
+			var collidedPoints = collisionDetection(d, e);
+			if (enlarge.checked) {
+				return (chart.radius + (collidedPoints.length - 1));
+			} else {
+				return chart.radius;
+			}
+		}
+
+	</script>
+
+</body>
+
+</html>
