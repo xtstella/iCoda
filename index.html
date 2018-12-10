@@ -230,26 +230,20 @@
 				var timePeriods = [];
 				var nPeople = {};
 				perCity.values.forEach(function(d) {
+					var name = d.city + "_" + d.yearmonth;
 					if (!timePeriods.includes(d.yearmonth)) {
 
-						var name = d.city + "_" + d.yearmonth;
-						var addNode = [{
+						var addNode = {
 							"node": countid,
 							"name": name,
 							"nPeople": 1
-						}];
-						    //nPeople[d.] = (nPeople[a] || 0) + 1;
-
+						};
+						//nPeople[d.] = (nPeople[a] || 0) + 1;
 						timePeriods.push(d.yearmonth);
 						nodesSankey[name] = addNode;
 						countid = countid + 1;
 					} else {
-						var found = perCity.values.find(function(element) {
-							console.log(element);
-							return element.name == d.city + "_" + d.yearmonth;
-						});
-						//console.log(found);
-						//found.nPeople = found.nPeople + 1;
+						nodesSankey[name].nPeople = nodesSankey[name].nPeople + 1;
 					}
 				})
 			});
