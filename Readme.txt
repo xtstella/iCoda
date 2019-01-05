@@ -15,10 +15,8 @@ In order to run this project, you can run a local HTTP server, then open your we
 # If Python version returned above is 2.X
 	>> python -m SimpleHTTPServer 8000
 
-4. Open your web browser and enter the URL localhost:8000/index.html
-
-If it doesn’t work, then try 
-http://localhost:8080/...../index.html.  ( …… : the directory of the folder, ex. Desktop/Prototype0  )
+4. Open your web browser and enter the URL localhost:8000/
+   Here you'll see the contents of the directory listed — click the HTML file index.html
 
 
-If it runs well, you can click on "Choose file" button and then choose the maritime dataset file "…/Prototype0/Python_script/data.json"
+If it runs well, you can click on "Choose file" button and then choose the maritime dataset "…/Prototype0/Python_script/data.json"
