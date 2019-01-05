@@ -1,11 +1,14 @@
 html,
 body {
-	margin: 0;
+	margin: 30;
 	padding: 0;
-	width: 100%;
-	height: 100%;
+	margin-left: 30px;
+	/*width: 100%;
+	height: 100%;*/
 	font-family: 'Merriweather';
+	/*
 	text-align: center;
+*/
 }
 
 
@@ -35,7 +38,6 @@ select {
 	user-select: none;
 	cursor: pointer;
 	border-radius: 4px;
-	background-image: url(caret.png);
 	border: 1px solid #ccc;
 	background-repeat: no-repeat;
 	background-size: 23px;
@@ -70,11 +72,14 @@ input[type=datetime-local] {
 /**
 * Selects and Inputs
 **/
-
+/*
 .center-selects {
-	text-align: center;
+	
+	//text-align: center;
+
+	margin-left: 150px;
 	margin-top: 20px;
-}
+}*/
 
 .select-container {
 	display: inline-block;
@@ -86,6 +91,7 @@ input[type=datetime-local] {
 	margin-right: 10px;
 }
 
+/*
 @media(max-width: 750px) {
 	.select-container {
 		width: 250px;
@@ -94,10 +100,16 @@ input[type=datetime-local] {
 		margin: 10px auto;
 	}
 }
+*/
 
 /**
 * Tooltip
 **/
+
+/*
+#chart-tooltip {
+	width: 340px;
+}*/
 
 .tooltip {
 	position: absolute;
@@ -107,23 +119,29 @@ input[type=datetime-local] {
 	padding: 15px;
 	text-align: center;
 	border-radius: 5px;
-/*
+	/*
 	background: rgba(192, 192, 192, 0.6);
 */
 }
 
-/*div.tooltipDetail {
+.tooltipFixed {
 	position: absolute;
-	padding: 4px;
-	font-size: 11px;
-	background: rgba(192, 192, 192, 0.6);
-	pointer-events: none;
+	z-index: -1;
+	opacity: 0;
+	background: #efefef;
+	padding: 15px;
+	text-align: center;
 	border-radius: 5px;
-}*/
-
-
+	/*
+	background: rgba(192, 192, 192, 0.6);
+*/
+}
 
 .tooltip * {
+	display: inline-block;
+}
+
+.tooltipFixed * {
 	display: inline-block;
 }
 
@@ -165,31 +183,9 @@ text {
 
 }
 
-#chart-tooltip {
-	width: 340px;
-}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/*
 
 #hideSingle {
 	margin-left: 50px;
@@ -219,26 +215,8 @@ text {
 .link[hide="true"] {
 	opacity: 0.2;
 }
-
-/*
-.node[hoveron="false"] {
-	opacity: 0.2;
-}*/
-
-/*
-g.node.selected circle {
-	fill: red;
-	stroke-opacity: 1;
-	stroke-width: 1.5px;
-}
 */
 
-
-/*.node text {
-	font: 10px sans-serif;
-	pointer-events: none;
-	text-anchor: middle;
-}*/
 
 /*div.tooltipDetail {
 	position: absolute;
@@ -251,6 +229,8 @@ g.node.selected circle {
 }*/
 
 
+
+/*
 div.tooltipSummary {
 	position: absolute;
 	height: 20px;
@@ -262,26 +242,34 @@ div.tooltipSummary {
 }
 
 
+div.tooltipDetail {
+	position: absolute;
+	padding: 4px;
+	font-size: 11px;
+	background: rgba(192, 192, 192, 0.6);
+	pointer-events: none;
+	border-radius: 5px;
+}
 
-
+*/
 
 .node rect {
-  cursor: move;
-  fill-opacity: .9;
-  shape-rendering: crispEdges;
+	cursor: move;
+	fill-opacity: .9;
+	shape-rendering: crispEdges;
 }
 
 .node text {
-  pointer-events: none;
-  text-shadow: 0 1px 0 #fff;
+	pointer-events: none;
+	text-shadow: 0 1px 0 #fff;
 }
 
 .link {
-  fill: none;
-  stroke: #000;
-  stroke-opacity: .2;
+	fill: none;
+	stroke: #000;
+	stroke-opacity: .2;
 }
 
 .link:hover {
-  stroke-opacity: .5;
+	stroke-opacity: .5;
 }

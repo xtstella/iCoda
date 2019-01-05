@@ -3,30 +3,22 @@
 
 <head>
 	<meta charset="utf-8">
-	<title> Sankey Timeline for people between cities</title>
+	<title> Maritime Location-Time line chart</title>
 	<link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Merriweather'>
 
 	<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js'></script>
 
 	<script src="http://d3js.org/d3.v4.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>
+
+
 	<link rel="stylesheet" href="index.css">
 </head>
 
-<style>
-
-	div.tooltipDetail {
-	position: absolute;
-	padding: 4px;
-	font-size: 11px;
-	background: rgba(192, 192, 192, 0.6);
-	pointer-events: none;
-	border-radius: 5px;
-}
-
-</style>
-
 <body>
+
+	<input type="file" id="fileLoader" name="files" title="Load File" />
 
 	<div id="option">
 		<input name="swapButton" id="swapButton" type="button" value="Swap Axis" />
@@ -44,30 +36,11 @@
 				<input type='radio' name="group2" id='bunshin-checkbox' />
 				<label>Sankey</label>
 				<input type='radio' name="group2" id='sankey-checkbox' />
+				<label>Bar</label>
+				<input type='radio' name="group2" id='bar-checkbox' />
 			</div>
 			<br>
-			<!--		<div class='select-container'>
-				<label>Entity Focus:</label>
-				<select id='select-entityfocus'>
-					<option value='ville' selected>Ville</option>
-					<option value='personnage'>Personnage</option>				
-					Gender,occupations, nationalities, religion, Education
-				</select>
-			</div>-->
-
-			<!--
-			<div class='select-container'>
-				<label>Points:</label>
-				<select id='scatterplot-points'>
-					<option value='occupations' selected>Occupation</option>
-					<option value='gender'>Gender</option>
-					<option value='education'>Education</option>
-					<option value='religion'>Religion</option>
-					<option value='nationalities'>Nationality</option>
-					<option value='writing'>Writing</option>
-				</select>
-			</div>
--->
+	
 
 			<div class='select-container'>
 				<label>Comment voulez-vous mettre en évidence les coïncidences? --> </label>
@@ -83,53 +56,63 @@
 
 		<div class='chart-container'>
 			<div id='chart-tooltip' class='tooltip'>
-				<div class='user'></div>
-				<div class='name'></div>
+				<div class='publication'></div>
+				<div class='person'></div>
 				<div class='date'></div>
-				<div class='city'></div>
+				<div class='location'></div>
+			</div>
+			<div id='chart-tooltip2' class='tooltip'>
+				<div class='publication'></div>
+				<div class='person'></div>
+				<div class='date'></div>
+				<div class='location'></div>
 			</div>
 			<div id='chart' class='chart'></div>
 		</div>
 	</div>
 
-	<script src="chart.js" charset="utf-8"></script>
-	<script src="axis.js" charset="utf-8"></script>
+	<script src="createChart.js" charset="utf-8"></script>
+	<script src="loadFile.js"></script>
 	<script src="processingData.js" charset="utf-8"></script>
+	<script src="axis.js" charset="utf-8"></script>
 	<script src="updateNodes.js" charset="utf-8"></script>
 	<script src="updateLinks.js" charset="utf-8"></script>
+	<script src="handleMouse.js" charset="utf-8"></script>
+	<script src="force.js" charset="utf-8"></script>
 	<script src="bunshin.js" charset="utf-8"></script>
-	<script src="sankey.js"></script>
+
+
 
 	<script>
-		var parameters = {
-			"show": {
-				"minReviewsToShow": 5,
-				"opacityHigh": 1,
-				"opacityLow": 0.2
-			}
-		}
-
 		// Parse the date from raw data.
-		var parseDate;
+		//var parseDate = d3.timeParse("%Y-%m-%d");
 		// Format the date to show in the tooltip
-		var hoverDate;
-		var formatCount = d3.format(",.0f");
-		var colors = d3.scaleOrdinal(d3.schemeCategory20);
-		var tooltipDetail, tooltipSummary;
+		var Datehover = d3.timeFormat("%d/%m/%Y");
+		var DateYM = d3.timeFormat("%Y-%m");
+		var DateDM = d3.timeFormat("%m/%d");
+		var DateAxis = d3.timeFormat("%m/%d");
+		var DateTime = d3.timeFormat("%m/%d %H:%M");
 
-		var tootip;
+		var formatCount = d3.format(",.0f");
+		//var colors = d3.scaleOrdinal(d3.schemeCategory30).range(
+		var colors = d3.scaleOrdinal().range(["#1b70fc", "#faff16", "#d50527", "#158940", "#f898fd", "#24c9d7", "#cb9b64", "#866888", "#22e67a", "#e509ae", "#9dabfa", "#437e8a", "#b21bff", "#ff7b91", "#94aa05", "#ac5906", "#82a68d", "#fe6616", "#7a7352", "#f9bc0f", "#b65d66", "#07a2e6", "#c091ae", "#8a91a7", "#88fc07", "#ea42fe", "#9e8010", "#10b437", "#c281fe", "#f92b75", "#07c99d", "#a946aa", "#bfd544", "#16977e", "#ff6ac8", "#a88178", "#5776a9", "#678007", "#fa9316", "#85c070", "#6aa2a9", "#989e5d", "#fe9169", "#cd714a", "#6ed014", "#c5639c", "#c23271", "#698ffc", "#678275", "#c5a121", "#a978ba", "#ee534e", "#d24506", "#59c3fa", "#ca7b0a", "#6f7385", "#9a634a", "#48aa6f", "#ad9ad0", "#d7908c", "#6a8a53", "#8c46fc", "#8f5ab8", "#fd1105", "#7ea7cf", "#d77cd1", "#a9804b", "#0688b4", "#6a9f3e", "#ee8fba", "#a67389", "#9e8cfe", "#bd443c", "#6d63ff", "#d110d5", "#798cc3", "#df5f83", "#b1b853", "#bb59d8", "#1d960c", "#867ba8", "#18acc9", "#25b3a7", "#f3db1d", "#938c6d", "#936a24", "#a964fb", "#92e460", "#a05787", "#9c87a0", "#20c773", "#8b696d", "#78762d", "#e154c6", "#40835f", "#d73656", "#1afd5c", "#c4f546", "#3d88d8", "#bd3896", "#1397a3", "#f940a5", "#66aeff", "#d097e7", "#fe6ef9", "#d86507", "#8b900a", "#d47270", "#e8ac48", "#cf7c97", "#cebb11", "#718a90", "#e78139", "#ff7463", "#bea1fd"]);
+
+		var tooltip;
+		var tooltip2;
+		var width = 1000;
+		var height = 1000;
 
 		var chart = {
 			data: {
-				dir: './database/test1.csv',
-				time: "date", // Key within the data to be used to extract data for x axes
-				location: "city", // Key within data to be used for y values of curves
-				numberToShow: 500 // Max number of data to show
+				time: "dateObject", // Key within the data to be used to extract data for x axes
+				location: "location_names", // Key within data to be used for y values of curves
+				numberToShow: 300 // Max number of data to show
 			},
 			container: '#chart',
 			tooltip: '#chart-tooltip',
-			width: 1000,
-			height: 550,
+			tooltipFixed: '#chart-tooltip2',
+			width: 900,
+			height: 1450,
 			margin: {
 				top: 20,
 				right: 50,
@@ -138,18 +121,20 @@
 			padding: {
 				top: 60,
 				right: 20,
-				left: 20,
+				left: 40,
 				bottom: 20
 			},
 			jitterVal: 15,
 			radius: 5
 		}
 
-		var container = document.querySelector('#discrete-scatterplot-selects'),
+		var fileLoader = document.querySelector('#fileLoader'),
+			container = document.querySelector('#discrete-scatterplot-selects'),
 			entityfocus = container.querySelector('#select-entityfocus'),
 			normale = container.querySelector('#normale-checkbox'),
 			sankey = container.querySelector('#sankey-checkbox'),
 			bunshin = container.querySelector('#bunshin-checkbox'),
+			bar = container.querySelector('#bar-checkbox'),
 			points = container.querySelector('#scatterplot-points'),
 			jitter = container.querySelector('#jitter-checkbox'),
 			enlarge = container.querySelector('#enlarge-checkbox'),
@@ -162,36 +147,20 @@
 		createChart();
 
 		var subset;
+		var dateNest = [];
 		var peopleNest = [];
-		var cityNest = [];
-
-		var cities = [];
-		var people = [];
-		var timePeriods = [];
-
-		for (var i = 0; i < selects.length; i++) {
-			var elem = selects[i];
-			elem.addEventListener('change', redraw);
-		}
-
-		function redraw() {
-			d3.csv(chart.data.dir, function(error, data) {
-				ProcessingData(data);
-				updateChart();
-				updateNodes();
-				updateLinks();
-			})
-		};
-		redraw();
+		var links = [];
+		var nodes = [];
 
 		swapAxis.addEventListener('click', handleSwapAxis);
 		bunshin.addEventListener('change', handleBunshin);
 		normale.addEventListener('change', handleNormale);
 		sankey.addEventListener('change', handleSankey);
+		bar.addEventListener('change', handleBar);
 		jitter.addEventListener('change', handleJitter);
 		enlarge.addEventListener('click', handleEnlarge);
 		rien.addEventListener('change', updateNodes);
-
+		fileLoader.addEventListener('change', handleFileSelect);
 
 		function handleJitter() {
 			updateNodes();
@@ -204,6 +173,7 @@
 		var timeAxis_horizontal = true;
 
 		function handleSwapAxis() {
+			g.selectAll(".g").remove();
 			g.selectAll("g.bunshin").remove();
 			g.selectAll('g.bunshinLines').remove();
 			updateScale();
@@ -212,47 +182,49 @@
 		}
 
 		function handleBunshin() {
+			g.selectAll(".g").remove();
+			g.selectAll(".node").remove();
+			g.selectAll(".rect").remove();
+			g.selectAll(".path").remove();
+			g.selectAll(".link").remove();
+
 			updateNodes();
 			updateLinks();
 		}
 
 		var nodesSankey = [];
+		var linksSankey = [];
 
 		function handleSankey() {
-			cityNest = d3.nest()
-				.key(function(d) {
-					return d[chart.data.location];
-				})
-				.entries(subset);
+			g.selectAll(".g").remove();
+			g.selectAll(".node").remove();
+			g.selectAll(".rect").remove();
+			g.selectAll(".path").remove();
+			g.selectAll("g.bunshin").remove();
+			g.selectAll('g.bunshinLines').remove();
+			ProcessingSankeyData();
+			sankeyChart();
+			//drawRects();
+			//updateLinks();
+		}
 
-			var countid = 0;
-			cityNest.forEach(function(perCity) {
-				var timePeriods = [];
-				var nPeople = {};
-				perCity.values.forEach(function(d) {
-					var name = d.city + "_" + d.yearmonth;
-					if (!timePeriods.includes(d.yearmonth)) {
-
-						var addNode = {
-							"node": countid,
-							"name": name,
-							"nPeople": 1
-						};
-						//nPeople[d.] = (nPeople[a] || 0) + 1;
-						timePeriods.push(d.yearmonth);
-						nodesSankey[name] = addNode;
-						countid = countid + 1;
-					} else {
-						nodesSankey[name].nPeople = nodesSankey[name].nPeople + 1;
-					}
-				})
-			});
-			console.log(nodesSankey);
-			updateNodes();
-			updateLinks();
+		function handleBar() {
+			g.selectAll(".g").remove();
+			g.selectAll(".node").remove();
+			g.selectAll(".rect").remove();
+			g.selectAll(".path").remove();
+			g.selectAll("g.bunshin").remove();
+			g.selectAll('g.bunshinLines').remove();
+			ProcessingSankeyData();
+			drawRects();
+			//updateLinks();
 		}
 
 		function handleNormale() {
+			g.selectAll(".g").remove();
+			g.selectAll(".node").remove();
+			g.selectAll(".rect").remove();
+			g.selectAll(".path").remove();
 			g.selectAll("g.bunshin").remove();
 			g.selectAll('g.bunshinLines').remove();
 			updateNodes();

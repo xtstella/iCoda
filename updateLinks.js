@@ -3,13 +3,13 @@ function updateLinks() {
 	g.selectAll('.path').remove();
 	
 	if (!bunshin.checked) {
-
+		
 		var person_EntityLine = d3.line()
 			.x(function (d, i, e) {
-				return getXPosition1(d, i, e);
+				return getXPosition1(d['publication'], i, e);
 			})
 			.y(function (d, i, e) {
-				return getYPosition1(d, i, e);
+				return getYPosition1(d['publication'], i, e);
 			})
 			.curve(d3.curveCatmullRom.alpha(1));
 
@@ -32,8 +32,6 @@ function updateLinks() {
 			.attr("d", function (d) {
 				return person_EntityLine(d.values); //d.lineString;	
 			});
-
-		console.log(peopleNest);
 
 	} else if (bunshin.checked) {
 
@@ -104,7 +102,7 @@ function updateLinks() {
 		var position;
 
 		if (timeAxis_horizontal) {
-			position = yScale(d[chart.data.location]);
+			position = yScale(d[chart.data.location][0]);
 		} else {
 			position = yScale(d[chart.data.time]);
 		}

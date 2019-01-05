@@ -14,15 +14,19 @@ function updateScale() {
 
 function setTimeScale() {
 	return d3.scaleTime()
-		.domain([new Date(2008, 0, 1), new Date(2012, 0, 1)]);
+		.domain(d3.extent(nodes, function (d) {
+			console.log(d[chart.data.time]);
+			return d[chart.data.time];
+		}))
+
+	/*	return d3.scaleTime()
+		.domain([new Date(2008, 0, 1), new Date(2012, 0, 1)]);*/
 }
 
 function setLocationScale() {
 
 	return d3.scalePoint()
-		.domain(subset.map(function (d) {
-			return d[chart.data.location];
-		}));
+		.domain(getLocationDomain());
 
 }
 
@@ -31,6 +35,7 @@ function updateAxis() {
 	yScale.range([chart.padding.top, chart.height - chart.padding.bottom]);
 
 	xAxis = d3.axisBottom(xScale)
+		.tickFormat(DateAxis)
 		.tickSize(-chart.height); //Draw Grids : Use negative width and height for the axis tick length And then use a CSS style to stroke the grid.
 
 	yAxis = d3.axisLeft(yScale)

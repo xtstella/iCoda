@@ -1,52 +1,74 @@
 function ProcessingData(inputdata) {
 
-	hoverDate = d3.timeFormat("%d/%m/%Y");
-	parseDate = d3.timeParse("%Y-%m-%d");
-	var yearmonth = d3.timeFormat("%Y-%m");
+	console.log(inputdata);
+	subset = inputdata.slice(0, 800);
 
-	subset = inputdata.slice(0, chart.data.numberToShow);
-	console.log(subset);
+	var date_array = [],
+		date_id = 0;
 
-	var user_array = [],
-		user_uid = 0,
-		user_array_uid = [];
+	var id_array = [],
+		UID = 0;
 
-	var t = [];
+	var person_names = [],
+		person_id = 0;
 
 	subset.forEach(function (d) {
 
-		/*d.year = d3.timeParse("%Y-%m-%d")(d.date).getFullYear();
-		d.month = d3.timeParse("%Y-%m-%d")(d.date).getMonth() + 1;
-		d.day = d3.timeParse("%Y-%m-%d")(d.date).getDay();*/
+		d.dateObject = new Date(d['fulltime']);
+		/*d.datehover = Datehover(d.date);*/
+		d.dateYM = DateYM(d.dateObject);
 
-		d.date = parseDate(d.date);
-		d.showdate = hoverDate(d.date);
-		d.yearmonth = yearmonth(d.date);
-
-		if (!user_array_uid.includes(d.user_id)) {
-			user_array_uid.push(d.user_id);
-			user_uid++;
-			d.reviewerid = user_uid;
-
+		if (!date_array.includes(d.date)) {
+			date_array.push(d.date);
+			d.date_id = date_id;
+			date_id++;
 		} else {
-			var userid = user_array_uid.indexOf(d.user_id) + 1;
-			d.reviewerid = userid;
-
+			d.date_id = date_array.indexOf(d.date);
 		}
 
+		/*if (!id_array.includes(d.id)) {
+					id_array.push(d.id);
+					d.UID = UID;
+					UID++;
+				} else {
+					d.UID = id_array.indexOf(d.id);
+				}*/
 
+		/*for (var p in d.person_names) {
+					if (!person_names.includes(p)) {
+						person_names.push(p);
+						d.person_names = person_names;
+						person_id++;
+					} else {
+						d.person_id = person_id_array.indexOf(d.person_id);
+					}
+				}*/
 	});
 
-	subset = subset.sort(sortByDateAscending);
-	subset = subset.sort(sortByCityAscending);
+	console.log("subset:");
+	console.log(subset);
+	//subset = subset.sort(sortByDateAscending);
+	//subset = subset.sort(sortByCityAscending);
 
-	// Nest the entries by user_id
-	peopleNest = d3.nest()
+	dateNest = d3.nest()
 		.key(function (d) {
-			return d.reviewerid;
+			return d.date_id;
 		})
 		.entries(subset);
-	
+
+	console.log("dateNest:");
+	console.log(dateNest);
+
+	var person_pub = extractPerson(subset);
+
+	peopleNest = d3.nest()
+		.key(function (d) {
+			return d.person_name;
+		})
+		.entries(person_pub);
+
+	console.log("peopleNest:");
+	console.log(peopleNest);
 
 }
 
@@ -59,4 +81,18 @@ function sortByDateAscending(a, b) {
 function sortByCityAscending(a, b) {
 	// Dates will be cast to numbers automagically:
 	return a[chart.data.locatoin] - b[chart.data.location];
+}
+
+//https://stackoverflow.com/questions/39592554/nest-data-containing-arrays-with-d3-nest
+function extractPerson(data) {
+	var res = [];
+	data.forEach(function (publication) {
+		publication.person_names.forEach(function (person_name) {
+			res.push({
+				person_name: person_name,
+				publication: publication
+			});
+		})
+	})
+	return res;
 }
